@@ -1,0 +1,54 @@
+{
+  "products": [
+    {
+      "id": "1739546892743",
+      "name": "Yaourts",
+      "price": 3,
+      "category": "nourriture",
+      "inStock": true
+    },
+    {
+      "id": "1739553827690",
+      "name": "Test Laptop",
+      "price": 999.99,
+      "category": "electronics",
+      "inStock": true
+    },
+    {
+      "id": "1739568838849",
+      "name": "New Test Product",
+      "price": 149.99,
+      "category": "test",
+      "inStock": true
+    }
+  ],
+  "orders": [
+    {
+      "id": "1739546927413",
+      "userId": "user123",
+      "products": [
+        {
+          "productId": "1739546892743",
+          "quantity": 53
+        }
+      ],
+      "status": "pending",
+      "createdAt": "2025-02-14T15:28:47.413Z"
+    }
+  ],
+  "carts": [
+    {
+      "userId": "user123",
+      "items": [
+        {
+          "productId": "1739546892743",
+          "quantity": 53
+        },
+        {
+          "productId": "1",
+          "quantity": 1
+        }
+      ]
+    }
+  ]
+}

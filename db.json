@@ -1,0 +1,13 @@
+{
+  "products": [
+    {
+      "id": "1739545943403",
+      "name": "Laptop",
+      "price": 999.99,
+      "category": "electronics",
+      "inStock": true
+    }
+  ],
+  "orders": [],
+  "carts": []
+}

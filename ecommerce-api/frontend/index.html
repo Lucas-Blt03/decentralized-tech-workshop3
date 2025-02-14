@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .product-card {
+            margin-bottom: 20px;
+        }
+        .cart-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">E-commerce Store</a>
+            <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
+                Cart <span id="cartCount" class="badge bg-primary">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h2>Products</h2>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    Add Product
+                </button>
+            </div>
+        </div>
+        
+        <div id="productsList" class="row">
+            <!-- Products will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Cart Offcanvas -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Shopping Cart</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div id="cartItems">
+                <!-- Cart items will be loaded here -->
+            </div>
+            <div class="mt-3">
+                <h5>Total: $<span id="cartTotal">0.00</span></h5>
+                <button class="btn btn-success w-100" onclick="placeOrder()">Place Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Price</label>
+                            <input type="number" class="form-control" name="price" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <input type="text" class="form-control" name="category" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" name="inStock" checked>
+                            <label class="form-check-label">In Stock</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Product</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:3000';
+        const USER_ID = 'user123'; // Simulated user ID
+        let cart = { items: [] };
+
+        // Fetch and display products
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/products`);
+                const products = await response.json();
+                const productsHtml = products.map(product => `
+                    <div class="col-md-4 product-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.name}</h5>
+                                <p class="card-text">$${product.price}</p>
+                                <p class="card-text">Category: ${product.category}</p>
+                                <p class="card-text">
+                                    <span class="badge ${product.inStock ? 'bg-success' : 'bg-danger'}">
+                                        ${product.inStock ? 'In Stock' : 'Out of Stock'}
+                                    </span>
+                                </p>
+                                <button class="btn btn-primary" onclick="addToCart('${product.id}', 1)">
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('productsList').innerHTML = productsHtml;
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        // Add product form handler
+        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const productData = {
+                name: formData.get('name'),
+                price: parseFloat(formData.get('price')),
+                category: formData.get('category'),
+                inStock: formData.get('inStock') === 'on'
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productData)
+                });
+                if (response.ok) {
+                    loadProducts();
+                    bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+                    e.target.reset();
+                }
+            } catch (error) {
+                console.error('Error adding product:', error);
+            }
+        });
+
+        // Cart functions
+        async function addToCart(productId, quantity) {
+            try {
+                const response = await fetch(`${API_URL}/cart/${USER_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId, quantity })
+                });
+                if (response.ok) {
+                    loadCart();
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+            }
+        }
+
+        async function loadCart() {
+            try {
+                const response = await fetch(`${API_URL}/cart/${USER_ID}`);
+                cart = await response.json();
+                updateCartDisplay();
+            } catch (error) {
+                console.error('Error loading cart:', error);
+            }
+        }
+
+        async function removeFromCart(productId) {
+            try {
+                await fetch(`${API_URL}/cart/${USER_ID}/item/${productId}`, {
+                    method: 'DELETE'
+                });
+                loadCart();
+            } catch (error) {
+                console.error('Error removing from cart:', error);
+            }
+        }
+
+        async function updateCartDisplay() {
+            const cartItemsElement = document.getElementById('cartItems');
+            const cartCountElement = document.getElementById('cartCount');
+            
+            cartCountElement.textContent = cart.items.length;
+            
+            // Fetch product details for cart items
+            const itemsWithDetails = await Promise.all(cart.items.map(async item => {
+                const response = await fetch(`${API_URL}/products/${item.productId}`);
+                const product = await response.json();
+                return { ...item, product };
+            }));
+
+            const total = itemsWithDetails.reduce((sum, item) => 
+                sum + (item.product.price * item.quantity), 0);
+            
+            cartItemsElement.innerHTML = itemsWithDetails.map(item => `
+                <div class="cart-item">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6>${item.product.name}</h6>
+                            <p>Quantity: ${item.quantity}</p>
+                        </div>
+                        <div>
+                            <p>$${(item.product.price * item.quantity).toFixed(2)}</p>
+                            <button class="btn btn-sm btn-danger" onclick="removeFromCart('${item.productId}')">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('cartTotal').textContent = total.toFixed(2);
+        }
+
+        async function placeOrder() {
+            try {
+                const response = await fetch(`${API_URL}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: USER_ID,
+                        products: cart.items
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Order placed successfully!');
+                    // Clear cart
+                    cart = { items: [] };
+                    updateCartDisplay();
+                }
+            } catch (error) {
+                console.error('Error placing order:', error);
+                alert('Error placing order. Please try again.');
+            }
+        }
+
+        // Initial load
+        loadProducts();
+        loadCart();
+
+        // Configuration and API handling
+        const DNS_REGISTRY = 'http://localhost:3000';
+        let currentServer = null;
+
+        async function getHealthyServer() {
+            try {
+                const response = await fetch(`${DNS_REGISTRY}/getServer`);
+                const data = await response.json();
+                if (data.code === 200) {
+                    return data.server;
+                }
+                throw new Error('No healthy server available');
+            } catch (error) {
+                console.error('Error getting healthy server:', error);
+                throw error;
+            }
+        }
+
+        async function makeApiRequest(path, options = {}) {
+            const maxRetries = 3;
+            let lastError;
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    // Get a healthy server if we don't have one
+                    if (!currentServer) {
+                        currentServer = await getHealthyServer();
+                    }
+
+                    const response = await fetch(`${currentServer}${path}`, options);
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed:`, error);
+                    lastError = error;
+                    // Reset current server to force getting a new one
+                    currentServer = null;
+                }
+            }
+
+            // Show error message to user
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.textContent = 'Service temporarily unavailable. Please try again later.';
+            document.body.insertBefore(errorDiv, document.body.firstChild);
+
+            throw lastError;
+        }
+
+        // Replace all fetch calls in your frontend code with makeApiRequest
+        // For example:
+        async function loadProducts() {
+            try {
+                const products = await makeApiRequest('/products');
+                // Rest of your product loading code...
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+    </script>
+</body>
+</html>

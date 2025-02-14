@@ -1,0 +1,13 @@
+{
+  "products": [
+    {
+      "id": "1739569017579",
+      "name": "Test Product",
+      "price": 99.99,
+      "category": "test",
+      "inStock": true
+    }
+  ],
+  "orders": [],
+  "carts": []
+}

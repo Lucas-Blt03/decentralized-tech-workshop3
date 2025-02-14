@@ -1,0 +1,42 @@
+{
+    "models": {
+        "RandomForest_20250212_171702": {
+            "stake": 1000,
+            "weight": 1.0,
+            "prediction_history": [],
+            "accuracy_history": []
+        },
+        "LogisticRegression_20250212_171702": {
+            "stake": 1000,
+            "weight": 1.0,
+            "prediction_history": [],
+            "accuracy_history": []
+        },
+        "SVM_20250212_171702": {
+            "stake": 1000,
+            "weight": 1.0,
+            "prediction_history": [],
+            "accuracy_history": []
+        }
+    },
+    "transaction_history": [
+        {
+            "timestamp": "2025-02-12T17:17:02.038174",
+            "model_id": "RandomForest_20250212_171702",
+            "type": "registration",
+            "amount": 1000
+        },
+        {
+            "timestamp": "2025-02-12T17:17:02.078030",
+            "model_id": "LogisticRegression_20250212_171702",
+            "type": "registration",
+            "amount": 1000
+        },
+        {
+            "timestamp": "2025-02-12T17:17:02.088011",
+            "model_id": "SVM_20250212_171702",
+            "type": "registration",
+            "amount": 1000
+        }
+    ]
+}
